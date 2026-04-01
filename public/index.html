@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Toon Cleaners</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --yellow: #FFE033;
+      --black: #1a1a1a;
+      --red: #E63946;
+      --white: #FAFAFA;
+      --card: #ffffff;
+      --border: 3px solid var(--black);
+      --shadow: 5px 5px 0px var(--black);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--yellow);
+      background-image: repeating-linear-gradient(
+        45deg, transparent, transparent 20px,
+        rgba(0,0,0,0.04) 20px, rgba(0,0,0,0.04) 40px
+      );
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    header { text-align: center; margin-bottom: 40px; }
+    header h1 {
+      font-family: 'Bangers', cursive;
+      font-size: 4rem;
+      letter-spacing: 3px;
+      color: var(--black);
+      text-shadow: 4px 4px 0 var(--red);
+      line-height: 1;
+    }
+    header p {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--black);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 4px;
+      padding: 28px;
+    }
+    .card h2 {
+      font-family: 'Bangers', cursive;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: var(--border);
+    }
+
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    label .required { color: var(--red); margin-left: 2px; }
+
+    input, select {
+      width: 100%;
+      padding: 10px 14px;
+      border: var(--border);
+      border-radius: 2px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: var(--white);
+      transition: box-shadow 0.15s;
+      outline: none;
+    }
+    input:focus, select:focus { box-shadow: 3px 3px 0 var(--black); }
+
+    .btn {
+      padding: 10px 16px;
+      font-family: 'Bangers', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      border: var(--border);
+      border-radius: 2px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--black); }
+    .btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--black); }
+    .btn-primary { background: var(--black); color: var(--yellow); width: 100%; margin-top: 8px; font-size: 1.4rem; }
+    .btn-primary:hover { box-shadow: 7px 7px 0 var(--red); }
+    .btn-edit   { background: var(--yellow); color: var(--black); font-size: 0.85rem; padding: 4px 10px; box-shadow: 3px 3px 0 var(--black); }
+    .btn-delete { background: var(--red);    color: var(--white); font-size: 0.85rem; padding: 4px 10px; box-shadow: 3px 3px 0 var(--black); }
+
+    #toast {
+      display: none;
+      padding: 12px 16px;
+      margin-top: 16px;
+      border: var(--border);
+      border-radius: 2px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    #toast.success { background: #d4edda; color: #155724; }
+    #toast.error   { background: #f8d7da; color: #721c24; }
+
+    .customer-list { max-height: 500px; overflow-y: auto; }
+    .customer-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border: 2px solid var(--black);
+      border-radius: 2px;
+      margin-bottom: 8px;
+      background: var(--white);
+      animation: slideIn 0.2s ease;
+      gap: 8px;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .customer-name { font-weight: 700; font-size: 0.95rem; }
+    .customer-meta { font-size: 0.8rem; color: #555; margin-top: 2px; }
+    .customer-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border: 2px solid var(--black);
+      border-radius: 2px;
+      white-space: nowrap;
+      background: var(--yellow);
+    }
+    .empty { text-align: center; color: #999; font-style: italic; padding: 20px; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white);
+      border: var(--border);
+      box-shadow: 8px 8px 0 var(--black);
+      border-radius: 4px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      position: relative;
+    }
+    .modal h2 {
+      font-family: 'Bangers', cursive;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: var(--border);
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: var(--red);
+      color: white;
+      border: var(--border);
+      border-radius: 2px;
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      padding: 2px 10px;
+      cursor: pointer;
+    }
+    .modal-footer { display: flex; gap: 10px; margin-top: 8px; }
+    .btn-save   { flex: 1; background: var(--black); color: var(--yellow); }
+    .btn-cancel { flex: 1; background: var(--white); color: var(--black); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🧺 Toon Cleaners</h1>
+    <p>Est. 1940 · Serving Toons Since Technicolor</p>
+  </header>
+
+  <div class="layout">
+
+    <!-- ADD CUSTOMER FORM -->
+    <div class="card">
+      <h2>New Customer</h2>
+      <div class="form-group">
+        <label>First Name <span class="required">*</span></label>
+        <input type="text" id="first_name" placeholder="e.g. Bugs" />
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" id="last_name" placeholder="e.g. Bunny" />
+      </div>
+      <div class="form-group">
+        <label>Universe <span class="required">*</span></label>
+        <select id="universe">
+          <option value="">— Select Universe —</option>
+          <option value="Looney Tunes">Looney Tunes</option>
+          <option value="Hanna-Barbera">Hanna-Barbera</option>
+          <option value="Cartoon Network">Cartoon Network</option>
+          <option value="Disney">Disney</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="phone" placeholder="555-0100" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="character@toonmail.com" />
+      </div>
+      <button class="btn btn-primary" onclick="submitCustomer()">Register Customer</button>
+      <div id="toast"></div>
+    </div>
+
+    <!-- CUSTOMER ROSTER -->
+    <div class="card">
+      <h2>Customer Roster</h2>
+      <div class="customer-list" id="customerList">
+        <div class="empty">Loading roster...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h2>Edit Customer</h2>
+      <input type="hidden" id="edit_id" />
+      <div class="form-group">
+        <label>First Name <span class="required">*</span></label>
+        <input type="text" id="edit_first_name" />
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" id="edit_last_name" />
+      </div>
+      <div class="form-group">
+        <label>Universe <span class="required">*</span></label>
+        <select id="edit_universe">
+          <option value="">— Select Universe —</option>
+          <option value="Looney Tunes">Looney Tunes</option>
+          <option value="Hanna-Barbera">Hanna-Barbera</option>
+          <option value="Cartoon Network">Cartoon Network</option>
+          <option value="Disney">Disney</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="edit_phone" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="edit_email" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-save" onclick="saveEdit()">Save Changes</button>
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadCustomers() {
+      try {
+        const res = await fetch('/api/customers');
+        const customers = await res.json();
+        const list = document.getElementById('customerList');
+        if (!customers.length) {
+          list.innerHTML = '<div class="empty">No customers yet. Add one!</div>';
+          return;
+        }
+        list.innerHTML = customers.map(c => `
+          <div class="customer-item">
+            <div style="flex:1; min-width:0">
+              <div class="customer-name">${c.first_name}${c.last_name ? ' ' + c.last_name : ''}</div>
+              <div class="customer-meta">${c.email || 'No email'} · ⭐ ${c.loyalty_points} pts</div>
+            </div>
+            <span class="badge">${c.universe}</span>
+            <div class="customer-actions">
+              <button class="btn btn-edit" onclick='openEdit(${JSON.stringify(c)})'>Edit</button>
+              <button class="btn btn-delete" onclick="deleteCustomer(${c.customer_id}, '${c.first_name}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        document.getElementById('customerList').innerHTML = '<div class="empty">Could not load customers.</div>';
+      }
+    }
+
+    async function submitCustomer() {
+      const first_name = document.getElementById('first_name').value.trim();
+      const last_name  = document.getElementById('last_name').value.trim();
+      const universe   = document.getElementById('universe').value;
+      const phone      = document.getElementById('phone').value.trim();
+      const email      = document.getElementById('email').value.trim();
+      if (!first_name || !universe) { showToast('First name and universe are required.', 'error'); return; }
+      try {
+        const res = await fetch('/api/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name, last_name, universe, phone, email })
+        });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'Something went wrong.', 'error'); return; }
+        showToast(`${data.first_name} added to the roster!`, 'success');
+        ['first_name','last_name','phone','email'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('universe').value = '';
+        loadCustomers();
+      } catch (err) { showToast('Could not reach the server.', 'error'); }
+    }
+
+    function openEdit(customer) {
+      document.getElementById('edit_id').value         = customer.customer_id;
+      document.getElementById('edit_first_name').value = customer.first_name;
+      document.getElementById('edit_last_name').value  = customer.last_name || '';
+      document.getElementById('edit_universe').value   = customer.universe;
+      document.getElementById('edit_phone').value      = customer.phone || '';
+      document.getElementById('edit_email').value      = customer.email || '';
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('open');
+    }
+
+    async function saveEdit() {
+      const id         = document.getElementById('edit_id').value;
+      const first_name = document.getElementById('edit_first_name').value.trim();
+      const last_name  = document.getElementById('edit_last_name').value.trim();
+      const universe   = document.getElementById('edit_universe').value;
+      const phone      = document.getElementById('edit_phone').value.trim();
+      const email      = document.getElementById('edit_email').value.trim();
+      if (!first_name || !universe) { alert('First name and universe are required.'); return; }
+      try {
+        const res = await fetch(`/api/customers/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name, last_name, universe, phone, email })
+        });
+        const data = await res.json();
+        if (!res.ok) { alert(data.error || 'Something went wrong.'); return; }
+        closeModal();
+        showToast(`${data.first_name} updated!`, 'success');
+        loadCustomers();
+      } catch (err) { alert('Could not reach the server.'); }
+    }
+
+    async function deleteCustomer(id, name) {
+      if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
+      try {
+        const res = await fetch(`/api/customers/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) { showToast(data.error || 'Could not delete.', 'error'); return; }
+        showToast(`${name} removed from the roster.`, 'success');
+        loadCustomers();
+      } catch (err) { showToast('Could not reach the server.', 'error'); }
+    }
+
+    function showToast(msg, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = type;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    loadCustomers();
+  </script>
+
+</body>
+</html>
