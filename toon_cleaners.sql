@@ -199,7 +199,7 @@ INSERT INTO orders (customer_id, employee_id, drop_off_date, pickup_date, status
 CREATE TABLE order_items (
     item_id SERIAL PRIMARY KEY,
     order_id INT NOT NULL REFERENCES orders(order_id),
-    garment_id INT NOT NULL REFERENCES garments(garment_id),
+    garment_id INT REFERENCES garments(garment_id),
     service_id INT NOT NULL REFERENCES services(service_id),
     price NUMERIC(8,2) NOT NULL,
     employee_id INT REFERENCES employees(employee_id) -- who handled this specific item
@@ -222,10 +222,10 @@ INSERT INTO order_items (order_id, garment_id, service_id, price, employee_id) V
 (9, 22, 3, 9.99, 7),  -- hair product = stain removal, obviously
 (10, 11, 4, 24.99, 7),
 (10, 12, 3, 9.99, 7),
-(11, 29, 2, 6.99, 5),
-(12, 30, 1, 12.99, 1),
-(12, 31, 10, 15.00, 3),
-(12, 30, 3, 9.99, 7),
+(11, 23, 2, 6.99, 5),
+(12, 24, 1, 12.99, 1),
+(12, 25, 10, 15.00, 3),
+(12, 24, 3, 9.99, 7),
 (13, 1, 1, 12.99, 1),
 (14, 3, 1, 12.99, 1),
 (14, 4, 3, 9.99, 7),
