@@ -24,7 +24,6 @@ app.use(session({
   cookie: { secure: false }
 }));
 app.use(express.static(path.join(__dirname, 'public')));
-
 // Auth middleware
 function requireAuth(req, res, next) {
   if (req.session.userId) return next();
@@ -69,9 +68,8 @@ app.post('/api/auth/logout', (req, res) => {
   req.session.destroy();
   res.json({ message: 'Logged out' });
 });
-
 // GET all customers
-app.get('/api/customers', requireAuth, async (req, res) => {
+app.get('/api/customers', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM customers ORDER BY customer_id');
     res.json(result.rows);
@@ -82,7 +80,7 @@ app.get('/api/customers', requireAuth, async (req, res) => {
 });
 
 // POST new customer
-app.post('/api/customers', requireAuth, async (req, res) => {
+app.post('/api/customers', async (req, res) => {
   const { first_name, last_name, universe, phone, email } = req.body;
 
   if (!first_name || !universe) {
@@ -104,7 +102,7 @@ app.post('/api/customers', requireAuth, async (req, res) => {
 });
 
 // PUT update customer
-app.put('/api/customers/:id', requireAuth, async (req, res) => {
+app.put('/api/customers/:id', async (req, res) => {
   const { id } = req.params;
   const { first_name, last_name, universe, phone, email } = req.body;
 
@@ -129,7 +127,7 @@ app.put('/api/customers/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE customer
-app.delete('/api/customers/:id', requireAuth, async (req, res) => {
+app.delete('/api/customers/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
