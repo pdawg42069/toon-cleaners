@@ -24,12 +24,13 @@ echo "==> Installing pgAdmin4 web..."
 sudo apt update -qq
 sudo apt install -y pgadmin4-web
 
+echo "==> Configuring Apache for pgAdmin..."
+sudo /usr/pgadmin4/bin/setup-web.sh --yes 2>/dev/null || true
+
 echo "==> Creating pgAdmin admin user..."
 sudo /usr/pgadmin4/venv/bin/python3 /usr/pgadmin4/web/setup.py \
   add-user --admin "$PGADMIN_EMAIL" "$PGADMIN_PASSWORD"
 
-echo "==> Configuring Apache for pgAdmin..."
-sudo /usr/pgadmin4/bin/setup-web.sh --yes 2>/dev/null || true
 
 echo ""
 echo "==> Done. pgAdmin is available at:"

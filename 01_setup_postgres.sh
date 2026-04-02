@@ -6,7 +6,7 @@
 
 set -e  # exit on any error
 
-DB_USER="apirillo"
+DB_USER="admin"
 DB_PASSWORD="password"  # change this after setup
 DB_NAME="toon_cleaners"
 
