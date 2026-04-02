@@ -47,7 +47,6 @@
       letter-spacing: 2px;
     }
 
-    /* Top bar with logged-in user + logout */
     .topbar {
       display: none;
       justify-content: flex-end;
@@ -142,18 +141,6 @@
     #toast.success { background: #d4edda; color: #155724; }
     #toast.error   { background: #f8d7da; color: #721c24; }
 
-    #login-error {
-      display: none;
-      padding: 12px 16px;
-      margin-top: 16px;
-      border: var(--border);
-      border-radius: 2px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      background: #f8d7da;
-      color: #721c24;
-    }
-
     .customer-list { max-height: 500px; overflow-y: auto; }
     .customer-item {
       display: flex;
@@ -186,7 +173,6 @@
     }
     .empty { text-align: center; color: #999; font-style: italic; padding: 20px; }
 
-    /* Login screen */
     #login-screen {
       display: flex;
       justify-content: center;
@@ -195,11 +181,55 @@
     }
     #login-screen .card { width: 100%; max-width: 400px; }
 
-    /* Main app */
     #app { display: none; }
     #app.visible { display: block; }
 
-    /* Modal */
+    /* Error splash */
+    #error-splash {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+    }
+    #error-splash.visible { display: flex; }
+
+    .error-heading {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(3rem, 12vw, 9rem);
+      color: var(--red);
+      text-shadow: 6px 6px 0 var(--black);
+      line-height: 1;
+      animation: shake 0.5s ease;
+    }
+
+    .error-subtext {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 28px;
+      color: var(--black);
+      border: var(--border);
+      background: var(--white);
+      padding: 16px 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .error-back {
+      margin-top: 36px;
+      width: 280px;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      15%       { transform: translateX(-12px) rotate(-2deg); }
+      30%       { transform: translateX(12px) rotate(2deg); }
+      45%       { transform: translateX(-8px) rotate(-1deg); }
+      60%       { transform: translateX(8px) rotate(1deg); }
+      75%       { transform: translateX(-4px); }
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -265,13 +295,20 @@
         <input type="password" id="login-password" placeholder="••••••••" />
       </div>
       <button class="btn btn-primary" onclick="login()">Log In</button>
-      <div id="login-error"></div>
     </div>
+  </div>
+
+  <!-- ERROR SPLASH -->
+  <div id="error-splash">
+    <div class="error-heading">OOPS!<br>SOMETHING<br>WENT WRONG!</div>
+    <div class="error-subtext">
+      What went wrong? I could tell you.<br>But fuck you! 🖕
+    </div>
+    <button class="btn btn-primary error-back" onclick="showLogin()">Try Again</button>
   </div>
 
   <!-- MAIN APP -->
   <div id="app">
-
     <div class="topbar" id="topbar">
       <span id="logged-in-user"></span>
       <button class="btn btn-logout" onclick="logout()">Logout</button>
@@ -279,7 +316,6 @@
 
     <div class="layout">
 
-      <!-- ADD CUSTOMER FORM -->
       <div class="card">
         <h2>New Customer</h2>
         <div class="form-group">
@@ -313,7 +349,6 @@
         <div id="toast"></div>
       </div>
 
-      <!-- CUSTOMER ROSTER -->
       <div class="card">
         <h2>Customer Roster</h2>
         <div class="customer-list" id="customerList">
@@ -368,14 +403,28 @@
     // -------------------------------------------------------
     // AUTH
     // -------------------------------------------------------
+    function showLogin() {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('error-splash').classList.remove('visible');
+      document.getElementById('login-username').value = '';
+      document.getElementById('login-password').value = '';
+    }
+
+    function showErrorSplash() {
+      document.getElementById('login-screen').style.display = 'none';
+      const splash = document.getElementById('error-splash');
+      splash.classList.remove('visible');
+      // force reflow to restart animation
+      void splash.offsetWidth;
+      splash.classList.add('visible');
+    }
+
     async function login() {
       const username = document.getElementById('login-username').value.trim();
       const password = document.getElementById('login-password').value;
-      const errEl = document.getElementById('login-error');
 
       if (!username || !password) {
-        errEl.textContent = 'Username and password are required.';
-        errEl.style.display = 'block';
+        showErrorSplash();
         return;
       }
 
@@ -387,15 +436,12 @@
         });
         const data = await res.json();
         if (!res.ok) {
-          errEl.textContent = data.error || 'Login failed.';
-          errEl.style.display = 'block';
+          showErrorSplash();
           return;
         }
-        errEl.style.display = 'none';
         showApp(data.username);
       } catch (err) {
-        errEl.textContent = 'Could not reach the server.';
-        errEl.style.display = 'block';
+        showErrorSplash();
       }
     }
 
@@ -403,34 +449,32 @@
       await fetch('/api/auth/logout', { method: 'POST' });
       document.getElementById('app').classList.remove('visible');
       document.getElementById('topbar').classList.remove('visible');
-      document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('login-username').value = '';
-      document.getElementById('login-password').value = '';
+      showLogin();
     }
 
     function showApp(username) {
       document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('error-splash').classList.remove('visible');
       document.getElementById('app').classList.add('visible');
       document.getElementById('topbar').classList.add('visible');
       document.getElementById('logged-in-user').textContent = `👤 ${username}`;
       loadCustomers();
     }
 
-    // Allow Enter key on login form
     document.getElementById('login-password').addEventListener('keydown', e => {
       if (e.key === 'Enter') login();
     });
 
-// Check if already logged in on page load
-(async () => {
-  try {
-    const res = await fetch('/api/auth/me');
-    if (res.ok) {
-      const data = await res.json();
-      showApp(data.username);
-    }
-  } catch (err) {}
-})();
+    // Check if already logged in on page load
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          showApp(data.username);
+        }
+      } catch (err) {}
+    })();
 
     // -------------------------------------------------------
     // CUSTOMERS
