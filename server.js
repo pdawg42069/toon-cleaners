@@ -70,6 +70,15 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ message: 'Logged out' });
 });
 
+// Check current session
+app.get('/api/auth/me', (req, res) => {
+  if (req.session.userId) {
+    res.json({ username: req.session.username });
+  } else {
+    res.status(401).json({ error: 'Not logged in' });
+  }
+});
+
 // GET all customers
 app.get('/api/customers', requireAuth, async (req, res) => {
   try {
@@ -102,7 +111,14 @@ app.post('/api/customers', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
-
+// Check current session
+app.get('/api/auth/me', (req, res) => {
+  if (req.session.userId) {
+    res.json({ username: req.session.username });
+  } else {
+    res.status(401).json({ error: 'Not logged in' });
+  }
+});
 // PUT update customer
 app.put('/api/customers/:id', requireAuth, async (req, res) => {
   const { id } = req.params;

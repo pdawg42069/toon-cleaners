@@ -421,6 +421,17 @@
       if (e.key === 'Enter') login();
     });
 
+// Check if already logged in on page load
+(async () => {
+  try {
+    const res = await fetch('/api/auth/me');
+    if (res.ok) {
+      const data = await res.json();
+      showApp(data.username);
+    }
+  } catch (err) {}
+})();
+
     // -------------------------------------------------------
     // CUSTOMERS
     // -------------------------------------------------------
